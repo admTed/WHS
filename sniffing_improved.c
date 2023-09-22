@@ -46,20 +46,29 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
         // Check if it's a TCP packet
         if (ip->iph_protocol == IPPROTO_TCP) {
             struct tcphdr *tcp = (struct tcphdr *)(packet + sizeof(struct ethheader) + (ip->iph_ihl << 2));
+            int tcp_header_length = (tcp->th_offx2 >> 4) * 4; // TCP header length
 
             printf("TCP Header: src port: %d, dst port: %d\n",
                    ntohs(tcp->th_sport),
                    ntohs(tcp->th_dport));
+
+            // Calculate message length
+            int message_length = header->len - (sizeof(struct ethheader) + (ip->iph_ihl << 2) + tcp_header_length);
+
+            if (message_length > 0) {
+                printf("Message: ");
+                for (int i = 0; i < message_length; i++) {
+                    printf("%c", packet[sizeof(struct ethheader) + (ip->iph_ihl << 2) + tcp_header_length + i]);
+                }
+                printf("\n");
+            } else {
+                printf("No Message\n");
+            }
+        } else {
+            printf("Not a TCP packet\n");
         }
 
-        // Print Message
-        printf("Message: ");
-        // Calculate the length of the message
-        int message_length = header->len - (sizeof(struct ethheader) + (ip->iph_ihl << 2));
-        for (int i = 0; i < message_length; i++) {
-            printf("%c", packet[sizeof(struct ethheader) + (ip->iph_ihl << 2) + i]);
-        }
-        printf("\n\n");
+        printf("\n");
     }
 }
 
