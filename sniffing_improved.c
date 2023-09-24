@@ -6,6 +6,7 @@
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
 
+
 /* Ethernet header */
 struct ethheader {
     u_char  ether_dhost[6];    /* destination host address */
@@ -79,7 +80,7 @@ struct pseudo_tcp
         unsigned short tcpl;
         struct tcpheader tcp;
         char payload[1500];
-}; 
+};
 
 void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *packet) {
     struct ethheader *eth = (struct ethheader *)packet;
@@ -97,8 +98,7 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 
         // Check if it's a TCP packet
         if (ip->iph_protocol == IPPROTO_TCP) {
-            struct tcphdr *tcp = (struct tcphdr *)(packet + sizeof(struct ethheader) + (ip->iph_ihl << 2));
-            int tcp_header_length = (tcp->th_offx2 >> 4) * 4; // TCP header length
+            struct tcpheader *tcp = (struct tcpheader *)(packet + sizeof(struct ethheader) + sizeof(struct ipheader);
 
             printf("TCP Header: src port: %d, dst port: %d\n",
                    ntohs(tcp->th_sport),
